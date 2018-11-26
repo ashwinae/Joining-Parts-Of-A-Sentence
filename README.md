@@ -6,5 +6,5 @@ For example, ""
 
 This API attempts to connect the extracted entites using multiple grammatical rules and functions. 
 
-# API used:
+## API used:
 - Spacy.io
