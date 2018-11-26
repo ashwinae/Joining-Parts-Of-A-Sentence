@@ -10,7 +10,7 @@ A lot of existing ChatBot APIs extract the Intents and Parts of a sentence and r
 
 There are wide range of combinations in which the Intent and Part can be combined. But then, the output must be:
 
-        {"play cricket" , "need bat"} 
+        {"play" : "cricket" , "need" : "bat"} 
 
 This API attempts to connect the extracted entites using multiple grammatical rules and functions. 
 
