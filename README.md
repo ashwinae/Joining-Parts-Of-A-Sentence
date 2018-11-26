@@ -4,13 +4,13 @@ A lot of existing ChatBot APIs extract the Intents and Parts of a sentence and r
 
 - For example, if "I want to play cricket. Might need a bat for it though." returns: 
 
-    Intent : {want, play, need}
+        Intent : {want, play, need}
 
-    Part : {cricket, bat}
+        Part : {cricket, bat}
 
-There are wide range of combinations in which the Intent and Part can be combined. But then, eliminating "want" and giving out 
+There are wide range of combinations in which the Intent and Part can be combined. But then, the output must be:
 
-    {"play cricket" , "need bat"} is the requirement.  
+        {"play cricket" , "need bat"} 
 
 This API attempts to connect the extracted entites using multiple grammatical rules and functions. 
 
