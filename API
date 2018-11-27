@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
 @app.route('/match', methods=['POST'])
-def _preprocess():
+def _match():
     try:
         content = request.get_json()
         return jsonify(match(content))
