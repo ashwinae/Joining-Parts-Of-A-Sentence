@@ -1,4 +1,4 @@
-# Joining-Parts-Of-A-Sentence
+# Matching Parts of a Sentence
 
 A lot of existing ChatBot APIs extract the Intents and Parts of a sentence and return them to the user. The problem, however, arises in automating the process of connecting the Intents with the right Parts and vice-versa. 
 
@@ -12,6 +12,6 @@ There are wide range of combinations in which the Intent and Part can be combine
 
         {"play" : "cricket" , "need" : "bat"} 
 
-This API attempts to connect the extracted entites using multiple grammatical rules and functions. 
+This API attempts to connect the extracted entities using multiple grammatical rules and functions. 
 
 
