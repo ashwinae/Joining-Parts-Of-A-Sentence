@@ -1,0 +1,161 @@
+import en_core_web_sm
+nlp = en_core_web_sm.load()
+import itertools, collections
+from collections import Counter
+import re
+
+####################################################################################    
+
+###################
+####Clean Data#####
+###################
+
+def clean_data(string, nlp_model = False, noise = False, no_numbers = False):
+    if(type(string) == int or type(string) == float):
+        return ""
+    string_new = string.lower()
+    
+    english = {
+            "i/m" : "i'm", "'ll": " will", "'ve": " have", "'re":" are","'ve": " have", "can't": "cannot", "won't": "would not", 
+            "don't": "do not", "haven't": "have not", "isn't": "is not", "wouldn't": "would not", "couldn't": "could not", 
+            "doesn't": "does not", "wont": "would not", "cant": "can not", "dont": "do not", "havent": "have not", 
+            "doesnt": "does not", "wouldnt": "would not", "couldnt": "could not", "isnt": "is not", "//": "", "*": "",
+              }
+    
+    for error, replacement in english.items():
+        string_new = string_new.replace(error, replacement)
+    
+    string_new = re.sub("[;]", ".", string_new)
+    
+    if(no_numbers == True):
+        string_new = re.sub("[^a-zA-Z'-.:/,]", " ", string_new)
+    else:
+        string_new = re.sub("[^a-zA-Z0-9'-/.:,]", " ", string_new)
+        
+    string_new = string_new.replace("'s", "s")
+    split = string_new.split()
+    if(len(split) > 0):
+        split[len(split) - 1] = re.sub("[^a-zA-Z]", "", split[len(split) - 1])    
+    
+    if(noise == True):
+        string_new = [w for w in split if not w in noise_set]
+    
+    if(nlp_model == True):
+        return nlp(' '.join(split))
+
+    else:
+        return ' '.join(split)   
+        
+####################################################################################  
+
+#################
+####Get Root#####
+#################
+
+#Function that returns the root words
+    #Argument can be a single word, a list of words, or a nested list of words
+def get_root(phrases):
+    root_words = []
+    if(type(phrases) == list):        
+        for i in phrases:
+            if(type(i) == list):
+                doc = nlp(' '.join(i))
+                root_words.append([item.lemma_ for item in doc])
+            else:
+                doc = nlp(i)
+                for item in doc:
+                    root_words.append(item.lemma_)
+                
+    else:
+        doc = nlp(phrases)
+        for item in doc:
+            root_words.append(item.lemma_)
+        
+    return root_words
+    
+##################################################
+
+
+#########################
+####Match Verb Nouns#####
+#########################
+
+
+def match_verb_nouns(set1, set2, sentence):
+    complete_list = list()
+    doc = clean_data(sentence, nlp_model = True)
+    temp_set = []
+    verb = []
+    part_temp = []
+    
+    for item in set2:
+        part_split = item.split()
+        cont = 1 
+        for i in range(0, len(doc)):       
+            for j in range(0, len(part_split)):
+                if(cont == -1):
+                    break
+                if(part_split[j] == str(doc[i])):
+                    verb = get_root(str(doc[i].head))[0]
+                    if(verb in set1):
+                        if(verb in temp_set and item in part_temp):
+                            continue
+                        temp_set.append(verb)
+                        part_temp.append(item)  
+                        cont = -1
+                        complete_list.append({"action": verb, "part": " ".join(part_split)})
+                        break
+                        
+                    elif(cont == 1):
+                        for child in doc[i].children:
+                            verb = get_root(str(child))[0]                                
+                            if(verb in set1):
+                                if(verb in temp_set and item in part_temp):
+                                    continue                                    
+                                temp_set.append(verb)
+                                part_temp.append(item)   
+                                cont = -1
+                                complete_list.append({"action": verb, "part": " ".join(part_split)})                           
+                                break
+                                                                
+                    if(cont == 1):
+                       for count in range(i, len(doc)):
+                           if(doc[count].pos_ == "VERB"):
+                               children = [child for child in doc[count].children]
+                               if(len(children) != 0):
+                                   if(len(temp_set) != 0):
+                                       if(verb in temp_set and item in part_temp):
+                                           continue                                           
+                                       part_temp.append(item)    
+                                       cont = -1
+                                       complete_list.append({"action": str(temp_set[len(temp_set) - 1]), "part": " ".join(part_split)})                                             
+                                       break
+                                       
+                           elif(str(doc[count]) == '.' or str(doc[count]) == 'and'):
+                               verb = get_root(str(doc[count].head))[0]
+                               if(verb in set1):
+                                   if(verb in temp_set and item in part_temp):
+                                       continue                                       
+                                   temp_set.append(verb)
+                                   part_temp.append(item)   
+                                   cont = -1
+                                   complete_list.append({"action": verb, "part": " ".join(part_split)})
+                                   break    
+                                   
+                           elif(doc[count - 1].pos_ == "CCONJ"):
+                               if(len(temp_set) != 0):
+                                   if(verb in temp_set and item in part_temp):
+                                       continue                                       
+                                   part_temp.append(item)   
+                                   cont = -1
+                                   complete_list.append({"action": str(temp_set[len(temp_set) - 1]), "part": " ".join(part_split)})                                         
+                                   break
+                                            
+        if(len(part_temp) < len(set2) or (len(part_temp) == 0)):
+            for item in set2:
+                if(item in set2 and item not in part_temp):
+                    complete_list.append({"action": "inspect", "part": item})
+
+    matched = [dict(t) for t in {tuple(d.items()) for d in complete_list}]
+    
+    return matched
