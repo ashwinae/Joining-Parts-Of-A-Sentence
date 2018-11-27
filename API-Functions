@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov  7 12:45:03 2018
+
+@author: Ashwin
+"""
+
+from Core_Function import match_verb_nouns
+
+def validate_match(content):
+    keylist = content.keys()
+    if(("intent" not in keylist) or ("part" not in keylist) or ("sentence" not in keylist)):
+        return {'status' : False, 'message' : "Error: Input has a missing field(s)", "result": None}
+        
+    intent = content['intent']
+    part = content['part']
+    sentence = content['sentence']
+
+    if(type(intent) != list or type(part) != list or type(sentence) != str):
+        return {'status' : False, 'message' : "Error: 'intent','part' must be a list of strings and 'sentence' must be a string", "result": None}
+
+    else:
+        return {'status' : True}
+        
+def match(content):
+    result = validate_matchcorts1(content)
+    if (result['status']==False):
+        return result
+    intent = content['intent']
+    part = content['part']
+    sentence = content['sentence']
+
+    match = match_verb_nouns(intent, part, sentence)
+        
+    return {'status': True, 'message': 'Success', 'match': match}
