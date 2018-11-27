@@ -4,7 +4,7 @@ A lot of existing ChatBot APIs extract the Intents and Parts of a sentence and r
 
 - For example, if "I want to play cricket. Might need a bat for it though." returns: 
 
-        Intent : {want, play, need}
+        Intent : {want, play, might, need}
 
         Part : {cricket, bat}
 
